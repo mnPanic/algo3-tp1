@@ -2,8 +2,73 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 using namespace std;
+
+constexpr int INVALID_INSTANCE = -1;
+
+struct Local {
+    int beneficio;
+    int contagio;
+};
+
+/** Funciones auxiliares **/
+
+vector<bool>& set(vector<bool>& v, int i) {
+    v[i] = true;
+    return v;
+}
+
+vector<bool>& unset(vector<bool>& v, int i) {
+    v[i] = false;
+    return v;
+}
+
+string pertenenciaToString(vector<bool> &vs) {
+    string res = "";
+
+    for (bool v : vs) {
+        res += v? "1 " : "0 ";
+    }
+
+    return res;
+}
+
+// fuerzaBruta
+// Algoritmo recursivo de fuerza bruta
+// Complejidad temporal: O(n * 2^n)
+//
+// Asumimos que existe al menos un local que tenga contagio inferior a M
+int fuerzaBruta(vector<Local> &locales, int n, int M, vector<bool> &pertenencia, int i) {
+//    cout << "Estamos recorriendo el local: " << i << " con el vector " << pertenenciaToString(pertenencia) << endl;
+    if (i == n) {
+        int beneficioAcumulado = 0;
+        int contagioAcumulado = 0;
+
+        for (int j = 0; j < n; ++j) {
+            if (j != n-1 && pertenencia[j] && pertenencia[j+1]) {
+                return INVALID_INSTANCE;
+            }
+
+            if (pertenencia[j]) {
+                beneficioAcumulado += locales[j].beneficio;
+                contagioAcumulado += locales[j].contagio;
+            }
+
+            if (contagioAcumulado > M) {
+                return INVALID_INSTANCE;
+            }
+        }
+
+        return beneficioAcumulado;
+    }
+
+    return max(
+        fuerzaBruta(locales, n, M, unset(pertenencia, i), i+1),
+        fuerzaBruta(locales, n, M, set(pertenencia, i), i+1)
+    );
+}
 
 int main(int argc, char** argv) {
 	map<string, string> algorithms = {
@@ -34,17 +99,16 @@ int main(int argc, char** argv) {
     int M = 0; // Limite de contagio
     cin >> n >> M;
 
-    vector<pair<int, int>> locales(n, make_pair(0, 0));
+    vector<bool> pertenencia(n, false); // Acumulador de los locales incluidos en la solución parcial
+    vector<Local> locales(n, Local{0,0});
     for (int i = 0; i < n; ++i) {
-        int beneficio = 0;
-        int costo = 0;
-        cin >> beneficio >> costo;
-        locales[i] = make_pair(beneficio, costo);
+        cin >> locales[i].beneficio >> locales[i].contagio;
     }
 
     // Corremos el algoritmo
     if (algorithm == "FB") {
-        cout << "No implementado aun :(" << endl;
+
+        cout << fuerzaBruta(locales, n, M, pertenencia, 0) << endl;
     }
     else if (algorithm == "BT") {
         cout << "No implementado aun :(" << endl;
