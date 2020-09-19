@@ -7,7 +7,7 @@
 using namespace std;
 
 constexpr int INVALID_INSTANCE = -1;
-constexpr int UNDEFINED = -1;
+constexpr int MEM_UNDEFINED = -1;
 
 struct Local {
     int beneficio;
@@ -26,10 +26,16 @@ vector<bool>& unset(vector<bool>& v, int i) {
     return v;
 }
 
+// Para debug
 string pertenenciaToString(vector<bool> &vs) {
     string res = "";
-
+    bool first = true;
     for (bool v : vs) {
+        if (first) {
+            first = false;
+            continue;
+        }
+
         res += v? "1 " : "0 ";
     }
 
@@ -78,33 +84,38 @@ int backtracking(vector<Local> &locales, int n, int M, vector<bool> &pertenencia
     return 0;
 }
 
-// programacionDinamica()
-int programacionDinamica(vector<Local> &locales, int n, int M, vector<bool> &pertenencia, int i, vector< vector<int>> &mem) {
-    if (M < 0) {
-        return INVALID_INSTANCE;
-    }
+// programacionDinamica va de i=n a i=0
+// npm_pd(locales, M, <pertenencia>, i=n, <mem>, beneficio=0)
+int npm_pd(vector<Local> &locales, int M, vector<bool> &pertenencia, int i, vector<vector<int>> &mem, int beneficio) {
+    cout << 
+        string(pertenencia.size() - i, '\t') 
+        << "local: " << i 
+        << ", benef: " << beneficio 
+        << ", M: " << M
+        << " pertenencia " << pertenenciaToString(pertenencia) << endl;
+    // Poda por factibilidad: si nos pasamos el limite de contagio, no es
+    // necesario seguir viendo esta rama (propiedad dominó)
+    if (M < 0) return INVALID_INSTANCE;
+
+    // Caso base
+    if (i == 0) return beneficio;
 
     // Parte 1: lectura de la tabla de memoización
-    if (mem[M][i] != UNDEFINED) {
+    if (mem[M][i] != MEM_UNDEFINED) {
+        cout << string(pertenencia.size() - i, '\t') << "memo: " << mem[M][i] << endl;
         return mem[M][i];
     }
 
-    // Caso base
-    if (i == n) {
-        int beneficioAcumulado = 0;
-
-        for (int j = 0; j < n; ++j) {
-            if (pertenencia[j]) {
-                beneficioAcumulado += locales[j].beneficio;
-            }
-        }
-
-        return beneficioAcumulado;
-    }
+    bool tieneLocalVecino = (i < pertenencia.size() && pertenencia[i+1]);
 
     int maximoBeneficio = max(
-            fuerzaBruta(locales, n, M, unset(pertenencia, i), i+1),
-            pertenencia[i] ? fuerzaBruta(locales, n, M, set(pertenencia, i), i+1) : -1
+        npm_pd(locales, M, unset(pertenencia, i), i-1, mem, beneficio),
+        // Poda por factibilidad: Si el anterior pertenece, entonces no vamos a
+        // querer agregar a este, pues rompe con las reestricciones del
+        // problema.
+        tieneLocalVecino? 
+            INVALID_INSTANCE :
+            npm_pd(locales, M - locales[i].contagio, set(pertenencia, i), i-1, mem, beneficio + locales[i].beneficio)
     );
 
     // Parte 2: escritura de la tabla de memoización
@@ -140,12 +151,12 @@ int main(int argc, char** argv) {
     // Leemos el input.
     int n = 0; // Cantidad de locales en la avenida
     int M = 0; // Limite de contagio
-    cin >> n >> M;
+    std::cin >> n >> M;
 
-    vector<bool> pertenencia(n, false); // Acumulador de los locales incluidos en la solución parcial
-    vector<Local> locales(n, Local{0,0});
-    for (int i = 0; i < n; ++i) {
-        cin >> locales[i].beneficio >> locales[i].contagio;
+    vector<bool> pertenencia(n+1, false); // Acumulador de los locales incluidos en la solución parcial
+    vector<Local> locales(n+1, Local{0,0});
+    for (int i = 1; i <= n; ++i) {
+        std::cin >> locales[i].beneficio >> locales[i].contagio;
     }
 
     // Corremos el algoritmo
@@ -163,6 +174,7 @@ int main(int argc, char** argv) {
         cout << "No implementado aun :(" << endl;
     }
     else if (algorithm == "DP") {
-        cout << "No implementado aun :(" << endl;
+        auto mem = vector<vector<int>>(M+1, vector<int>(n+1, MEM_UNDEFINED));
+        cout << npm_pd(locales, M, pertenencia, n, mem, 0 /* beneficio */);
     }
 }
