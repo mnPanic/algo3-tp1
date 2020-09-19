@@ -7,6 +7,7 @@
 using namespace std;
 
 constexpr int INVALID_INSTANCE = -1;
+constexpr int UNDEFINED = -1;
 
 struct Local {
     int beneficio;
@@ -34,6 +35,8 @@ string pertenenciaToString(vector<bool> &vs) {
 
     return res;
 }
+
+/** Funciones principales **/
 
 // fuerzaBruta
 // Algoritmo recursivo de fuerza bruta
@@ -68,6 +71,46 @@ int fuerzaBruta(vector<Local> &locales, int n, int M, vector<bool> &pertenencia,
         fuerzaBruta(locales, n, M, unset(pertenencia, i), i+1),
         fuerzaBruta(locales, n, M, set(pertenencia, i), i+1)
     );
+}
+
+// backtracking()
+int backtracking(vector<Local> &locales, int n, int M, vector<bool> &pertenencia, int i) {
+    return 0;
+}
+
+// programacionDinamica()
+int programacionDinamica(vector<Local> &locales, int n, int M, vector<bool> &pertenencia, int i, vector< vector<int>> &mem) {
+    if (M < 0) {
+        return INVALID_INSTANCE;
+    }
+
+    // Parte 1: lectura de la tabla de memoización
+    if (mem[M][i] != UNDEFINED) {
+        return mem[M][i];
+    }
+
+    // Caso base
+    if (i == n) {
+        int beneficioAcumulado = 0;
+
+        for (int j = 0; j < n; ++j) {
+            if (pertenencia[j]) {
+                beneficioAcumulado += locales[j].beneficio;
+            }
+        }
+
+        return beneficioAcumulado;
+    }
+
+    int maximoBeneficio = max(
+            fuerzaBruta(locales, n, M, unset(pertenencia, i), i+1),
+            pertenencia[i] ? fuerzaBruta(locales, n, M, set(pertenencia, i), i+1) : -1
+    );
+
+    // Parte 2: escritura de la tabla de memoización
+    mem[M][i] = maximoBeneficio;
+
+    return maximoBeneficio;
 }
 
 int main(int argc, char** argv) {
