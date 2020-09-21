@@ -68,3 +68,12 @@ en caso de ya haberlo resuelto, se obtiene el valor de la estructura de guardado
 - [local3](https://www.google.com/imgres?imgurl=https%3A%2F%2Fanfix.com%2Fblog%2Fwp-content%2Fuploads%2F2016%2F02%2Falquiler.png&imgrefurl=https%3A%2F%2Fanfix.com%2Fblog%2Fque-clausulas-debe-contener-el-arrendamiento-de-un-local-de-negocio%2F&tbnid=-A2XzbLaSFaUTM&vet=12ahUKEwja4Lb0-fPrAhURBbkGHepBDEcQMygFegUIARCsAQ..i&docid=TIUPSPKXP3SPLM&w=1920&h=1080&q=imagenes%20locales%20comerciales%20png&ved=2ahUKEwja4Lb0-fPrAhURBbkGHepBDEcQMygFegUIARCsAQ)
 
 - [Persona con barbijo](https://www.google.com/search?q=persona+barbijo+png&tbm=isch&ved=2ahUKEwja4Lb0-fPrAhURBbkGHepBDEcQ2-cCegQIABAA&oq=persona+barbijo+png&gs_lcp=CgNpbWcQAzICCAAyBggAEAgQHjIGCAAQCBAeOgQIABBDOgUIABCxAzoHCAAQsQMQQzoECAAQHjoGCAAQBRAeUN2nCFicwAhgr8MIaABwAHgAgAG_AogBvg6SAQgxMS4yLjIuMZgBAKABAaoBC2d3cy13aXotaW1nwAEB&sclient=img&ei=Yk9lX9qnEpGK5OUP6oOxuAQ&bih=789&biw=1440#imgrc=v9BQe4bz2NCwiM)
+
+## Punteo de ideas para la experimentación
+
+- PD: solapamiento artificial y jugar con la relación entre 2^n y n * m.
+- BT:
+    - Optimalidad: generar instancias que funcionarían bien con el algoritmo goloso.
+    Por ejemplo, generar intercalado entre locales de mayor ratio beneficio/contagio.
+    - Factibilidad: generar instancias donde con pocos locales ya se exceda el límite de contagio.
+- FB: alguna combinación donde sean INÚTILES las podas, i.e. contagios bajos, tolerancia alta (M) y mucha dependencia en la vecindad.
