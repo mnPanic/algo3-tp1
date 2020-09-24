@@ -8,12 +8,21 @@ using namespace std;
 
 constexpr int INVALID_INSTANCE = 0;
 constexpr int INF = 1e6;
-constexpr int MEM_UNDEFINED = -1;
 
 struct Local {
     int beneficio;
     int contagio;
 };
+
+struct Resultado {
+    int set;
+    int unset;
+};
+
+Resultado MEM_UNDEFINED = Resultado{-1, -1};
+bool mem_undefined(Resultado r) {
+    return r.set == MEM_UNDEFINED.set && r.unset == MEM_UNDEFINED.unset;
+}
 
 /** Funciones auxiliares **/
 
@@ -198,7 +207,9 @@ int npm_bt(int i, int M, vector<bool> &vecinos, vector<Local> &ls, int B, int &m
     return maxBLocal;
 }
 
-int npm_pd(int i, int M, bool vecino, vector<Local> &ls, vector<vector<int>> &mem) {
+// NPM por programacion dinamica
+// Complejidad temporal: O(n * M)
+int npm_pd(int i, int M, bool vecino, vector<Local> &ls, vector<vector<Resultado>> &mem) {
     // Si nos pasamos del limite de contagio no es una instancia valida
     if (M < 0) return -INF;
 
@@ -206,25 +217,28 @@ int npm_pd(int i, int M, bool vecino, vector<Local> &ls, vector<vector<int>> &me
     if (i == 0) return 0;
 
     // Llamado recursivo
-    if (mem[i][M] == MEM_UNDEFINED) {
+    if (mem_undefined(mem[i][M])) {
         // Memoizamos siempre el valor "feliz", sin importarnos del contexto de
         // donde venimos, para que asi este caso sea independiente de los
         // anteriores.
-        int set = npm_pd(i-1, M - ls[i].contagio, true, ls, mem) + ls[i].beneficio;
-        int unset = npm_pd(i-1, M, false, ls, mem);
-        mem[i][M] = max(set, unset);
-
-        // Pero antes de retornar lo memoizado, debemos verificar que la
-        // solución devuelta cumpla con la restricción de locales vecinos.
-        // Esto solo puede suceder si la "ganadora" del llamado recursivo fue en
-        // la que nos pusimos, y en caso de que nuestro vecino tambien este,
-        // volvemos atras y retornamos el valor de la rama opuesta.
-        if (set > unset && vecino) {
-            return unset;
-        }
+        mem[i][M] = Resultado{
+            .set   = npm_pd(i-1, M - ls[i].contagio, true /* vecino */, ls, mem) + ls[i].beneficio,
+            .unset = npm_pd(i-1, M, false /* vecino */, ls, mem)
+        };
     }
 
-    return mem[i][M];
+    Resultado res = mem[i][M];
+
+    // Pero antes de retornar lo memoizado, debemos verificar que la
+    // solución devuelta cumpla con la restricción de locales vecinos.
+    // Esto solo puede suceder si la "ganadora" del llamado recursivo fue en
+    // la que nos pusimos, y en caso de que nuestro vecino tambien este,
+    // volvemos atras y retornamos el valor de la rama opuesta.
+    if (res.set > res.unset && vecino) {
+        return res.unset;
+    }
+
+    return max(res.set, res.unset);
 }
 
 int main(int argc, char** argv) {
@@ -275,7 +289,7 @@ int main(int argc, char** argv) {
         int maximoBeneficio = 0;
         cout << npm_bt_poda_opt(n, M, vecinos, locales, 0, maximoBeneficio) << endl;
     } else if (algorithm == "DP") {
-        auto mem = vector<vector<int>>(n+1, vector<int>(M+1, MEM_UNDEFINED));
+        auto mem = vector<vector<Resultado>>(n+1, vector<Resultado>(M+1, MEM_UNDEFINED));
         bool initial_vecino = true;
         cout << npm_pd(n, M, false, locales, mem) << endl;
     }
