@@ -61,10 +61,11 @@ bool compareLocales(Local A, Local B) {
 }
 
 int maximoBeneficioRestante(vector<Local> locales, int i, int M) {
-    stable_sort(locales.begin()+(i+1), locales.end(), compareLocales);
+    stable_sort(locales.begin()+1, locales.begin()+1+i, compareLocales);
     int contagioAcumulado = 0;
     int beneficioMaximo = 0;
-    for (Local local : locales) {
+    for (int j = 1; j < i + 1; j++) {
+        Local local = locales[j];
         contagioAcumulado += local.contagio;
         if (contagioAcumulado < M) return beneficioMaximo;
         beneficioMaximo += local.beneficio;
@@ -146,7 +147,7 @@ int npm_bt_poda_opt(int i, int M, vector<bool> &vecinos, vector<Local> &ls, int 
             }
         }
 
-        return 0;
+        return B;
     }
 
     // Poda por optimalidad
