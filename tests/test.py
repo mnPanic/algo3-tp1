@@ -5,8 +5,6 @@ import unittest
 import subprocess
 
 algorithms = ["FB", "BT", "BT-F", "BT-O", "DP"]
-
-
 def get_expected(file: str) -> str:
     with open(file) as f:
         return f.read().split(" ")[-1]

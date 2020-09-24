@@ -198,23 +198,30 @@ int npm_bt(int i, int M, vector<bool> &vecinos, vector<Local> &ls, int B, int &m
     return maxBLocal;
 }
 
-int npm_pd(int i, int M, vector<bool> &vecinos, vector<Local> &ls, vector<vector<int>> &mem) {
+int npm_pd(int i, int M, bool vecino, vector<Local> &ls, vector<vector<int>> &mem) {
     // Si nos pasamos del limite de contagio no es una instancia valida
     if (M < 0) return -INF;
-
-    // Si los dos ultimos vecinos estan siendo contemplados no es una
-    // instancia valida.
-    if (i < (ls.size() - 1) && vecinos[i + 1] && vecinos[i + 2]) return -INF;
 
     // Caso base
     if (i == 0) return 0;
 
     // Llamado recursivo
     if (mem[i][M] == MEM_UNDEFINED) {
-        mem[i][M] = max(
-            npm_pd(i-1, M - ls[i].contagio, set(vecinos, i), ls, mem) + ls[i].beneficio,
-            npm_pd(i-1, M, unset(vecinos, i), ls, mem)
-        );
+        // Memoizamos siempre el valor "feliz", sin importarnos del contexto de
+        // donde venimos, para que asi este caso sea independiente de los
+        // anteriores.
+        int set = npm_pd(i-1, M - ls[i].contagio, true, ls, mem) + ls[i].beneficio;
+        int unset = npm_pd(i-1, M, false, ls, mem);
+        mem[i][M] = max(set, unset);
+
+        // Pero antes de retornar lo memoizado, debemos verificar que la
+        // solución devuelta cumpla con la restricción de locales vecinos.
+        // Esto solo puede suceder si la "ganadora" del llamado recursivo fue en
+        // la que nos pusimos, y en caso de que nuestro vecino tambien este,
+        // volvemos atras y retornamos el valor de la rama opuesta.
+        if (set > unset && vecino) {
+            return unset;
+        }
     }
 
     return mem[i][M];
@@ -270,6 +277,6 @@ int main(int argc, char** argv) {
     } else if (algorithm == "DP") {
         auto mem = vector<vector<int>>(n+1, vector<int>(M+1, MEM_UNDEFINED));
         bool initial_vecino = true;
-        cout << npm_pd(n, M, vecinos, locales, mem) << endl;
+        cout << npm_pd(n, M, false, locales, mem) << endl;
     }
 }
