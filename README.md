@@ -24,26 +24,45 @@ TP1 de Algoritmos y Estructuras de datos 3
 
 - top-down de PD $O(n \times M)$
 
-    que carajo es la M
+    funcion matematica definida recursivamente
 
-    Si vas decrementando M con cada llamado recursivo, entonces podes guardar en
-    la tabla M x n donde n es el indice de comercio y M es el contagio hasta ese
-    momento.
+    i local
+    M contagio
+    devuelve el max beneficio
 
-    f(n, M, )
+    npm_pd(i, M) =
+        -∞          M < 0
+        0           i = 0
 
-    maxBeneficio(i, T, ...) \in O(n M)
-        = 0                                 i = 0 || T < 0
-        = max {
-            maxBeneficio(i - 1, T)          // no agregarlo
-            maxBeneficio(i - 1, T - b[i])   // agregarlo
+        max {
+            npm_pd(i-1, M - c_i) + b_i,
+            npm_pd(i-1, M),
         }
 
-    10
-    10 9
+    el problema se resuelve llamando npm_pd(n, M)
 
-    8
-    1 3 6 b80 t20  |  2 5 b60 t20
+    npm_pd(int i, int M, int n, bool b):
+        if M < 0:
+            return -∞
+
+        if i == 0:
+            return 0
+        
+        // check de validez
+        if b && i != n:
+            return -∞
+
+        // llamado recursivo
+        if mem[i][M] = UNDEFINED:
+            mem[i][M] = max(
+                npm_pd(i-1, M - c_i, b && true) + b_i,
+                npm_pd(i-1, M, b && false),
+            )
+
+        return mem[i][M]
+
+
+    llamar como npm_pd(n, M, n, true)
 
 ## Programación Dinámica
 

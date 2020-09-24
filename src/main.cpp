@@ -7,6 +7,7 @@
 using namespace std;
 
 constexpr int INVALID_INSTANCE = 0;
+constexpr int INF = 1e6;
 constexpr int MEM_UNDEFINED = -1;
 
 struct Local {
@@ -109,59 +110,110 @@ int fuerzaBruta(vector<Local> &locales, int n, int M, vector<bool> &pertenencia,
     );
 }
 
-// backtracking()
+// NPM con backtracking con podas de factibilidad
 // Complejidad temporal: O(n^2 * 2^n)
-int BT(vector<Local> &locales, int n, int M, vector<bool> &pertenencia, int i, bool podaFactibilidad, bool podaOptimalidad, int beneficioAcumulado, int &maximoBeneficio) {
-    // Poda de factibilidad
-    if (podaFactibilidad && M < 0) return INVALID_INSTANCE;
+int npm_bt_poda_fact(int i, int M, vector<bool> &vecinos, vector<Local> &ls) {
+    /* Podas de factibilidad */
+    // Si nos pasamos del limite de contagio no es una instancia valida
+    if (M < 0) return -INF;
 
-    if (i == n+1) {
-        if (M < 0) return INVALID_INSTANCE;
+    // Si los dos ultimos vecinos estan siendo contemplados no es una
+    // instancia valida.
+    if (i < (ls.size() - 1) && vecinos[i + 1] && vecinos[i + 2]) return -INF;
 
-        for (int j = 1; j < n; ++j) {
-            if (pertenencia[j] && pertenencia[j+1]) return INVALID_INSTANCE;
-        }
+    // Caso base
+    if (i == 0) return 0;
 
-        return beneficioAcumulado;
-    }
-
-    // El máximo beneficio restante no puede cortar en casos incorrectos debido a que es una sobreestimación del
-    // máximo beneficio real que se puede obtener si se continúa por esta rama.
-    if (podaOptimalidad && maximoBeneficioRestante(locales, i, M) + beneficioAcumulado < maximoBeneficio) return INVALID_INSTANCE;
-
-    int maximoBeneficioLocal = max(
-            BT(locales, n, M, unset(pertenencia, i), i+1, podaFactibilidad, podaOptimalidad, beneficioAcumulado, maximoBeneficio),
-            BT(locales, n, M-locales[i].contagio, set(pertenencia, i), i+1, podaFactibilidad, podaOptimalidad, beneficioAcumulado + locales[i].beneficio, maximoBeneficio)
+    // Llamado recursivo
+    return max(
+        npm_bt_poda_fact(i-1, M - ls[i].contagio, set(vecinos, i), ls) + ls[i].beneficio,
+        npm_bt_poda_fact(i-1, M, unset(vecinos, i), ls)
     );
-
-    maximoBeneficio = max(maximoBeneficio, maximoBeneficioLocal);
-
-    return maximoBeneficioLocal;
 }
 
-// programacionDinamica va de i=n a i=0
-// PD(locales, M, <pertenencia>, i=n, <mem>, beneficio=0)
-int PD(vector<Local> &locales, int M, vector<bool> &pertenencia, int i, vector<vector<int>> &mem) {
-    // Poda por factibilidad: si nos pasamos el limite de contagio, no es
-    // necesario seguir viendo esta rama (propiedad dominó)
-    if (M < 0) return INVALID_INSTANCE;
+// NPM con backtracking con podas de optimalidad
+// Complejidad temporal: O(n^2 * 2^n)
+int npm_bt_poda_opt(int i, int M, vector<bool> &vecinos, vector<Local> &ls, int B, int &maxB) {
+    // Caso base
+    if (i == 0) {
+        // Si nos pasamos del limite de contagio no es una instancia valida
+        if (M < 0) return -INF;
 
-    // Parte 1: lectura de la tabla de memoización
-    if (mem[i][M] == MEM_UNDEFINED) {
-        if (i == 0) {
-            // Caso base
-            mem[i][M] = 0;
-        } else {
-            // Caso recursivo
-            bool tieneLocalVecino = (i < pertenencia.size() && pertenencia[i+1]);
-
-            mem[i][M] = max(
-                    PD(locales, M, unset(pertenencia, i), i - 1, mem),
-                    tieneLocalVecino ?
-                        INVALID_INSTANCE :
-                        PD(locales, M - locales[i].contagio, set(pertenencia, i), i - 1, mem) + locales[i].beneficio
-            );
+        // No tiene que haber dos vecinos consecutivos
+        for (int j = 1; j < ls.size() - 1; ++j) {
+            if (vecinos[j] && vecinos[j+1]) {
+                return -INF;
+            }
         }
+
+        return 0;
+    }
+
+    // Poda por optimalidad
+    // El máximo beneficio restante no puede cortar en casos incorrectos debido
+    // a que es una sobreestimación del máximo beneficio real que se puede
+    // obtener si se continúa por esta rama.
+    if (maximoBeneficioRestante(ls, i, M) + B < maxB) return -INF;
+
+    // Llamado recursivo
+    int maxBLocal = max(
+        npm_bt_poda_opt(i-1, M - ls[i].contagio, set(vecinos, i), ls, B + ls[i].beneficio, maxB),
+        npm_bt_poda_opt(i-1, M, unset(vecinos, i), ls, B, maxB)
+    );
+
+    maxB = max(maxB, maxBLocal);
+
+    return maxBLocal;
+}
+
+// NPM con backtracking con podas de optimalidad Y factibilidad
+// Complejidad temporal: O(n^2 * 2^n)
+int npm_bt(int i, int M, vector<bool> &vecinos, vector<Local> &ls, int B, int &maxB) {
+    /* Podas de factibilidad */
+    // Si nos pasamos del limite de contagio no es una instancia valida
+    if (M < 0) return -INF;
+
+    // Si los dos ultimos vecinos estan siendo contemplados no es una
+    // instancia valida.
+    if (i < (ls.size() - 1) && vecinos[i + 1] && vecinos[i + 2]) return -INF;
+
+    // Caso base
+    if (i == 0) return B;
+
+    /** Poda por optimalidad **/
+    // El máximo beneficio restante no puede cortar en casos incorrectos debido
+    // a que es una sobreestimación del máximo beneficio real que se puede
+    // obtener si se continúa por esta rama.
+    if (maximoBeneficioRestante(ls, i, M) + B < maxB) return -INF;
+
+    // Llamado recursivo
+    int maxBLocal = max(
+        npm_bt_poda_opt(i-1, M - ls[i].contagio, set(vecinos, i), ls, B + ls[i].beneficio, maxB),
+        npm_bt_poda_opt(i-1, M, unset(vecinos, i), ls, B, maxB)
+    );
+
+    maxB = max(maxB, maxBLocal);
+
+    return maxBLocal;
+}
+
+int npm_pd(int i, int M, vector<bool> &vecinos, vector<Local> &ls, vector<vector<int>> &mem) {
+    // Si nos pasamos del limite de contagio no es una instancia valida
+    if (M < 0) return -INF;
+
+    // Si los dos ultimos vecinos estan siendo contemplados no es una
+    // instancia valida.
+    if (i < (ls.size() - 1) && vecinos[i + 1] && vecinos[i + 2]) return -INF;
+
+    // Caso base
+    if (i == 0) return 0;
+
+    // Llamado recursivo
+    if (mem[i][M] == MEM_UNDEFINED) {
+        mem[i][M] = max(
+            npm_pd(i-1, M - ls[i].contagio, set(vecinos, i), ls, mem) + ls[i].beneficio,
+            npm_pd(i-1, M, unset(vecinos, i), ls, mem)
+        );
     }
 
     return mem[i][M];
@@ -196,32 +248,27 @@ int main(int argc, char** argv) {
     int M = 0; // Limite de contagio
     std::cin >> n >> M;
 
-    vector<bool> pertenencia(n+1, false); // Acumulador de los locales incluidos en la solución parcial
     vector<Local> locales(n+1, Local{0,0});
+    vector<bool> vecinos(n+1, false);
     for (int i = 1; i <= n; ++i) {
         std::cin >> locales[i].beneficio >> locales[i].contagio;
     }
 
     // Corremos el algoritmo
     if (algorithm == "FB") {
-        cout << fuerzaBruta(locales, n, M, pertenencia, 0) << endl;
+        cout << fuerzaBruta(locales, n, M, vecinos, 0) << endl;
     } else if (algorithm == "BT") {
         int maximoBeneficio = 0;
-        cout << BT(locales, n, M, pertenencia, 0, true, true, 0, maximoBeneficio) << endl;
+        cout << npm_bt(n, M, vecinos, locales, 0, maximoBeneficio) << endl;
     } else if (algorithm == "BT-F") {
         int maximoBeneficio = 0;
-        cout << BT(locales, n, M, pertenencia, 0, true, false, 0, maximoBeneficio) << endl;
+        cout << npm_bt_poda_fact(n, M, vecinos, locales) << endl;
     } else if (algorithm == "BT-O") {
         int maximoBeneficio = 0;
-        cout << BT(locales, n, M, pertenencia, 0, false, true,  0, maximoBeneficio) << endl;
+        cout << npm_bt_poda_opt(n, M, vecinos, locales, 0, maximoBeneficio) << endl;
     } else if (algorithm == "DP") {
         auto mem = vector<vector<int>>(n+1, vector<int>(M+1, MEM_UNDEFINED));
-        for (int i = 0; i < M+1; ++i) {
-            mem[0][i] = 0;
-        }
-        for (int j = 0; j < n+1; ++j) {
-            mem[j][0] = 0;
-        }
-        cout << PD(locales, M, pertenencia, n, mem) << endl;
+        bool initial_vecino = true;
+        cout << npm_pd(n, M, vecinos, locales, mem) << endl;
     }
 }
