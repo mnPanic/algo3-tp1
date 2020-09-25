@@ -6,3 +6,8 @@ cmake-build-debug/
 
 # builds
 build/
+
+# Python
+.pytest_cache/
+__pycache__/
+jupyter/.ipynb_checkpoints/
