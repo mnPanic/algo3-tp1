@@ -62,21 +62,31 @@ void printMem(vector<vector<int>> &m) {
     cout << endl;
 }
 
+// Devuelve true si A deberia ir antes que B en el ordenamiento.
+// (A > B)
 bool compareLocales(Local A, Local B) {
     float ratioA = A.beneficio/A.contagio;
     float ratioB = B.beneficio/B.contagio;
 
-    return (ratioA < ratioB);
+    return (ratioA > ratioB);
 }
 
+// Da una cota superior para el maximo beneficio restante de forma golosa.
 int maximoBeneficioRestante(vector<Local> locales, int i, int M) {
-    stable_sort(locales.begin()+1, locales.begin()+1+i, compareLocales);
+    // Ordenamos los locales por su relacion b/c de forma decreciente
+    stable_sort(locales.begin() + 1, locales.begin() + (i+1), compareLocales);
+
+    // Recorremos los locales ordenados sumando al beneficio hasta que nos
+    // quedemos sin contagio.
     int contagioAcumulado = 0;
     int beneficioMaximo = 0;
     for (int j = 1; j < i + 1; j++) {
         Local local = locales[j];
         contagioAcumulado += local.contagio;
-        if (contagioAcumulado < M) return beneficioMaximo;
+
+        // Si me pase del contagio maximo, corto
+        if (contagioAcumulado > M) return beneficioMaximo;
+
         beneficioMaximo += local.beneficio;
     }
 
