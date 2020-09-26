@@ -11,3 +11,6 @@ build/
 .pytest_cache/
 __pycache__/
 jupyter/.ipynb_checkpoints/
+
+# instancias
+jupyter/instancias
