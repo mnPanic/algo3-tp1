@@ -1,8 +1,9 @@
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <chrono>
 #include <map>
-#include <algorithm>
 
 using namespace std;
 
@@ -100,7 +101,7 @@ int maximoBeneficioRestante(vector<Local> locales, int i, int M) {
 // Complejidad temporal: O(n * 2^n)
 //
 // Asumimos que existe al menos un local que tenga contagio inferior a M
-int fuerzaBruta(vector<Local> &locales, int n, int M, vector<bool> &pertenencia, int i) {
+int npm_fb(vector<Local> &locales, int n, int M, vector<bool> &pertenencia, int i) {
 //    cout << "Estamos recorriendo el local: " << i << " con el vector " << pertenenciaToString(pertenencia) << endl;
     if (i == n + 1) {
         int beneficioAcumulado = 0;
@@ -125,8 +126,8 @@ int fuerzaBruta(vector<Local> &locales, int n, int M, vector<bool> &pertenencia,
     }
 
     return max(
-        fuerzaBruta(locales, n, M, unset(pertenencia, i), i+1),
-        fuerzaBruta(locales, n, M, set(pertenencia, i), i+1)
+        npm_fb(locales, n, M, unset(pertenencia, i), i+1),
+        npm_fb(locales, n, M, set(pertenencia, i), i+1)
     );
 }
 
@@ -287,20 +288,32 @@ int main(int argc, char** argv) {
     }
 
     // Corremos el algoritmo
+    int maximum;
+    auto start = chrono::steady_clock::now();
     if (algorithm == "FB") {
-        cout << fuerzaBruta(locales, n, M, vecinos, 0) << endl;
+        maximum = npm_fb(locales, n, M, vecinos, 0);
     } else if (algorithm == "BT") {
         int maximoBeneficio = 0;
-        cout << npm_bt(n, M, vecinos, locales, 0, maximoBeneficio) << endl;
+        maximum = npm_bt(n, M, vecinos, locales, 0, maximoBeneficio);
     } else if (algorithm == "BT-F") {
         int maximoBeneficio = 0;
-        cout << npm_bt_poda_fact(n, M, vecinos, locales) << endl;
+        maximum = npm_bt_poda_fact(n, M, vecinos, locales);
     } else if (algorithm == "BT-O") {
         int maximoBeneficio = 0;
-        cout << npm_bt_poda_opt(n, M, vecinos, locales, 0, maximoBeneficio) << endl;
+        maximum = npm_bt_poda_opt(n, M, vecinos, locales, 0, maximoBeneficio);
     } else if (algorithm == "DP") {
         auto mem = vector<vector<Resultado>>(n+1, vector<Resultado>(M+1, MEM_UNDEFINED));
         bool initial_vecino = true;
-        cout << npm_pd(n, M, false, locales, mem) << endl;
+        maximum = npm_pd(n, M, false, locales, mem);
     }
+
+    // roba2 de gonza
+    auto end = chrono::steady_clock::now();
+	double total_time = chrono::duration<double, milli>(end - start).count();
+
+    // Imprimimos el tiempo de ejecucion por stderr
+    clog << total_time << endl;
+
+    // Imprimimos el resultado por stdout
+    cout << maximum << endl;
 }
