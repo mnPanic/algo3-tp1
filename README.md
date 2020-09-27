@@ -107,6 +107,7 @@ Podríamos dividir en dos grandes categorías los experimentos, en referencia al
 ### Instancias
 
 - *Control*: generada de manera aleatoria.
+
 - Factibilidad: las podas no tienen _contra_ porque se realizan en O(1).
     - Generar instancias donde con pocos locales ya se exceda el límite de contagio. Debido a que excederemos rápidamente el M.
     - Hipótesis: para casos donde no se excede el M, hasta no haber recorrido toda una rama, BT-F debería ser mucho mejor que FB por la poda de vecindad.
@@ -116,7 +117,6 @@ Podríamos dividir en dos grandes categorías los experimentos, en referencia al
 - PD: 
     - *Solapamiento*: se podría completar una matriz paralela a la matriz correspondiente al algoritmo de PD que permita conocer la cantidad de veces que fue utilizada una celda de la memoria. De esta manera, se podría utilizar para generar un _heatmap_ que permita conocer la densidad de accesos a cada región. Esto nos permitiría saber cuánto solapamiento tiene una instancia.
         - _Hipótesis_: existe correlación entre el porcentaje de locales que comparten el mismo grado de contagio y el nivel de solapamiento observado. Para probar esto podríamos diseñar distantas instancias que varíen de alguna manera a definir este porcentaje. Podría definirse una variable _G_ que determine el número de grupos en que se dividirán los locales de la instancia. El grado de contagio de cada grupo estará definido de la siguiente manera: _grupo i_ -> _contagio i * 10_.
-    - *Juego entre la complejidad O(n*M) y la cantidad de instancias 2^n. En los casos en que M sea muy grande, no va a tener sentido utilizar PD, debido a que la tabla va a ser innecesariamente grande para el caso de estudio.
     - *PD Negativo - Memoria Cache*: en una instancia de un tamaño no demasiado grande (modesto, según Manuel) tal que la tabla COMPLETA no entre en la CACHÉ, si no tiene solapamiento, se debería notar el _overhead_ de la lectura de la memoria.
 
 
