@@ -119,7 +119,18 @@ Podríamos dividir en dos grandes categorías los experimentos, en referencia al
         - _Hipótesis_: existe correlación entre el porcentaje de locales que comparten el mismo grado de contagio y el nivel de solapamiento observado. Para probar esto podríamos diseñar distantas instancias que varíen de alguna manera a definir este porcentaje. Podría definirse una variable _G_ que determine el número de grupos en que se dividirán los locales de la instancia. El grado de contagio de cada grupo estará definido de la siguiente manera: _grupo i_ -> _contagio i * 10_.
     - *PD Negativo - Memoria Cache*: en una instancia de un tamaño no demasiado grande (modesto, según Manuel) tal que la tabla COMPLETA no entre en la CACHÉ, si no tiene solapamiento, se debería notar el _overhead_ de la lectura de la memoria.
 
+### Experimentos para optimalidad
 
-    
+- Calcular up front el algoritmo goloso para todos los i-es.
+- Hacer el naive sumando todo lo restante y diviendo por dos.
+- El goloso deberia andar mejor que el naive, ya que provee estimaciones
+  muchisimo mas precisas, y con un costo de O(1) al estar precalculado.
+- Exp: correrlos todos contra FB para instancias de control para ver cual es
+  mejor.
 
+### TODOs
 
+domingo:
+
+- mejorar BT-O.
+- graficos y informe.
