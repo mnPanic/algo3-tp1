@@ -73,12 +73,15 @@ bool compareLocales(Local A, Local B) {
 }
 
 // Da una cota superior para el maximo beneficio restante de forma golosa.
+// Complejidad temporal: O(n log(n))
 int maximoBeneficioRestante(vector<Local> locales, int i, int M) {
     // Ordenamos los locales por su relacion b/c de forma decreciente
+    // O(n log(n))
     stable_sort(locales.begin() + 1, locales.begin() + (i+1), compareLocales);
 
     // Recorremos los locales ordenados sumando al beneficio hasta que nos
     // quedemos sin contagio.
+    // O(n)
     int contagioAcumulado = 0;
     int beneficioMaximo = 0;
     for (int j = 1; j < i + 1; j++) {
@@ -152,9 +155,45 @@ int npm_bt_poda_fact(int i, int M, vector<bool> &vecinos, vector<Local> &ls) {
     );
 }
 
+// NPM con backtracking con podas de optimalidad, con el maximo beneficio
+// restante cacheado.
+// Complejidad temporal: O(n * 2^n)
+int npm_bt_poda_opt_cache(int i, int M, vector<bool> &vecinos, vector<Local> &ls, int B, int &maxB, vector<int>& cacheB) {
+    // Caso base
+    if (i == 0) {
+        // Si nos pasamos del limite de contagio no es una instancia valida
+        if (M < 0) return -INF;
+
+        // No tiene que haber dos vecinos consecutivos
+        for (int j = 1; j < ls.size() - 1; ++j) {
+            if (vecinos[j] && vecinos[j+1]) {
+                return -INF;
+            }
+        }
+
+        return B;
+    }
+
+    // Poda por optimalidad
+    // El máximo beneficio restante no puede cortar en casos incorrectos debido
+    // a que es una sobreestimación del máximo beneficio real que se puede
+    // obtener si se continúa por esta rama.
+    if (cacheB[i] + B < maxB) return -INF;
+
+    // Llamado recursivo
+    int maxBLocal = max(
+        npm_bt_poda_opt_cache(i-1, M - ls[i].contagio, set(vecinos, i), ls, B + ls[i].beneficio, maxB, cacheB),
+        npm_bt_poda_opt_cache(i-1, M, unset(vecinos, i), ls, B, maxB, cacheB)
+    );
+
+    maxB = max(maxB, maxBLocal);
+
+    return maxBLocal;
+}
+
 // NPM con backtracking con podas de optimalidad
-// Complejidad temporal: O(n^2 * 2^n)
-int npm_bt_poda_opt(int i, int M, vector<bool> &vecinos, vector<Local> &ls, int B, int &maxB) {
+// Complejidad temporal: O(nlog(n) * 2^n)
+int npm_bt_poda_opt_golosa(int i, int M, vector<bool> &vecinos, vector<Local> &ls, int B, int &maxB) {
     // Caso base
     if (i == 0) {
         // Si nos pasamos del limite de contagio no es una instancia valida
@@ -178,8 +217,8 @@ int npm_bt_poda_opt(int i, int M, vector<bool> &vecinos, vector<Local> &ls, int 
 
     // Llamado recursivo
     int maxBLocal = max(
-        npm_bt_poda_opt(i-1, M - ls[i].contagio, set(vecinos, i), ls, B + ls[i].beneficio, maxB),
-        npm_bt_poda_opt(i-1, M, unset(vecinos, i), ls, B, maxB)
+        npm_bt_poda_opt_golosa(i-1, M - ls[i].contagio, set(vecinos, i), ls, B + ls[i].beneficio, maxB),
+        npm_bt_poda_opt_golosa(i-1, M, unset(vecinos, i), ls, B, maxB)
     );
 
     maxB = max(maxB, maxBLocal);
@@ -209,8 +248,8 @@ int npm_bt(int i, int M, vector<bool> &vecinos, vector<Local> &ls, int B, int &m
 
     // Llamado recursivo
     int maxBLocal = max(
-        npm_bt_poda_opt(i-1, M - ls[i].contagio, set(vecinos, i), ls, B + ls[i].beneficio, maxB),
-        npm_bt_poda_opt(i-1, M, unset(vecinos, i), ls, B, maxB)
+        npm_bt(i-1, M - ls[i].contagio, set(vecinos, i), ls, B + ls[i].beneficio, maxB),
+        npm_bt(i-1, M, unset(vecinos, i), ls, B, maxB)
     );
 
     maxB = max(maxB, maxBLocal);
@@ -257,7 +296,8 @@ int main(int argc, char** argv) {
 		{"FB", "Fuerza Bruta"},
         {"BT", "Backtracking con podas"},
         {"BT-F", "Backtracking con poda por factibilidad"}, 
-		{"BT-O", "Backtracking con poda por optimalidad"},
+		{"BT-O-G", "Backtracking con poda por optimalidad golosa"},
+        {"BT-O-C", "Backtracking con poda por optimalidad cacheado"},
         {"DP", "Programacion dinámica"},
 	};
 
@@ -298,9 +338,20 @@ int main(int argc, char** argv) {
     } else if (algorithm == "BT-F") {
         int maximoBeneficio = 0;
         maximum = npm_bt_poda_fact(n, M, vecinos, locales);
-    } else if (algorithm == "BT-O") {
+    } else if (algorithm == "BT-O-G") {
         int maximoBeneficio = 0;
-        maximum = npm_bt_poda_opt(n, M, vecinos, locales, 0, maximoBeneficio);
+        maximum = npm_bt_poda_opt_golosa(n, M, vecinos, locales, 0, maximoBeneficio);
+    } else if (algorithm == "BT-O-C") {
+        int maximoBeneficio = 0;
+        // Generamos la cache (en realidad no es una cache, ya sabemos, pero no
+        // encontramos mejor nombre) utilizada por el algoritmo
+        // O(n)
+        vector<int> cacheB(n+1, 0);
+        for (int j = 1; j <= n; j++) {
+            cacheB[j] = cacheB[j-1] + locales[j].beneficio;
+        }
+
+        maximum = npm_bt_poda_opt_cache(n, M, vecinos, locales, 0, maximoBeneficio, cacheB);
     } else if (algorithm == "DP") {
         auto mem = vector<vector<Resultado>>(n+1, vector<Resultado>(M+1, MEM_UNDEFINED));
         bool initial_vecino = true;
