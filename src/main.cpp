@@ -5,6 +5,10 @@
 #include <chrono>
 #include <map>
 
+// https://github.com/nlohmann/json
+#include "nlohmann/json.hpp"
+using json = nlohmann::json;
+
 using namespace std;
 
 constexpr int INVALID_INSTANCE = 0;
@@ -291,6 +295,15 @@ int npm_pd(int i, int M, bool vecino, vector<Local> &ls, vector<vector<Resultado
     return max(res.set, res.unset);
 }
 
+void grado_solapamiento(int i, int M, vector<Local> &ls, vector<vector<int>> &llamados) {
+    if(i == 0 || M < 0) return;
+
+    llamados[i][M]++;
+
+    grado_solapamiento(i-1, M-ls[i].contagio, ls, llamados);
+    grado_solapamiento(i-1, M, ls, llamados);
+}
+
 int main(int argc, char** argv) {
 	map<string, string> algorithms = {
 		{"FB", "Fuerza Bruta"},
@@ -299,6 +312,7 @@ int main(int argc, char** argv) {
 		{"BT-O-G", "Backtracking con poda por optimalidad golosa"},
         {"BT-O-C", "Backtracking con poda por optimalidad cacheado"},
         {"DP", "Programacion dinámica"},
+        {"GR", "Calificar el grado de solapamiento de una instancia"},
 	};
 
 	// Leo el argumento que indica el algoritmo. Tiene que haber al menos dos
@@ -330,6 +344,8 @@ int main(int argc, char** argv) {
     // Corremos el algoritmo
     int maximum;
     auto start = chrono::steady_clock::now();
+
+    // mem
     if (algorithm == "FB") {
         maximum = npm_fb(locales, n, M, vecinos, 0);
     } else if (algorithm == "BT") {
@@ -356,6 +372,11 @@ int main(int argc, char** argv) {
         auto mem = vector<vector<Resultado>>(n+1, vector<Resultado>(M+1, MEM_UNDEFINED));
         bool initial_vecino = true;
         maximum = npm_pd(n, M, false, locales, mem);
+    } else if (algorithm == "GR") {
+        vector<vector<int>> accesses(n+1, vector<int>(M+1, 0));
+        grado_solapamiento(n, M, locales, accesses);
+        json result = {{"pd_accesses", accesses}};
+        clog << result << endl;
     }
 
     // roba2 de gonza
