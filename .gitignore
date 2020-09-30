@@ -14,3 +14,6 @@ jupyter/.ipynb_checkpoints/
 
 # instancias
 jupyter/instancias
+
+# Mac
+*/.DS_Store

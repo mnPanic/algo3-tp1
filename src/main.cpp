@@ -89,13 +89,11 @@ int maximoBeneficioRestante(vector<Local> locales, int i, int M) {
     int contagioAcumulado = 0;
     int beneficioMaximo = 0;
     for (int j = 1; j < i + 1; j++) {
-        Local local = locales[j];
-        contagioAcumulado += local.contagio;
+        contagioAcumulado += locales[j].contagio;
+        beneficioMaximo += locales[j].beneficio;
 
         // Si me pase del contagio maximo, corto
         if (contagioAcumulado > M) return beneficioMaximo;
-
-        beneficioMaximo += local.beneficio;
     }
 
     return beneficioMaximo;
@@ -217,7 +215,7 @@ int npm_bt_poda_opt_golosa(int i, int M, vector<bool> &vecinos, vector<Local> &l
     // El máximo beneficio restante no puede cortar en casos incorrectos debido
     // a que es una sobreestimación del máximo beneficio real que se puede
     // obtener si se continúa por esta rama.
-    if (maximoBeneficioRestante(ls, i, M) + B < maxB) return -INF;
+    if (maximoBeneficioRestante(ls, i, M) + B <= maxB) return -INF;
 
     // Llamado recursivo
     int maxBLocal = max(
