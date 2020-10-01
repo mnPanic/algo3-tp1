@@ -137,7 +137,7 @@ int npm_fb(vector<Local> &locales, int n, int M, vector<bool> &pertenencia, int 
 }
 
 // NPM con backtracking con podas de factibilidad
-// Complejidad temporal: O(n^2 * 2^n)
+// Complejidad temporal: O(2^n)
 int npm_bt_poda_fact(int i, int M, vector<bool> &vecinos, vector<Local> &ls) {
     /* Podas de factibilidad */
     // Si nos pasamos del limite de contagio no es una instancia valida
@@ -229,7 +229,7 @@ int npm_bt_poda_opt_golosa(int i, int M, vector<bool> &vecinos, vector<Local> &l
 }
 
 // NPM con backtracking con podas de optimalidad Y factibilidad
-// Complejidad temporal: O(n^2 * 2^n)
+// Complejidad temporal: O(n logn * 2^n)
 int npm_bt(int i, int M, vector<bool> &vecinos, vector<Local> &ls, int B, int &maxB) {
     /* Podas de factibilidad */
     // Si nos pasamos del limite de contagio no es una instancia valida
