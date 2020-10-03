@@ -70,10 +70,7 @@ void printMem(vector<vector<int>> &m) {
 // Devuelve true si A deberia ir antes que B en el ordenamiento.
 // (A > B)
 bool compareLocales(Local A, Local B) {
-    float ratioA = A.beneficio/A.contagio;
-    float ratioB = B.beneficio/B.contagio;
-
-    return (ratioA > ratioB);
+    return A.beneficio > B.beneficio;
 }
 
 // Da una cota superior para el maximo beneficio restante de forma golosa.
