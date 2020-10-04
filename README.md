@@ -13,7 +13,7 @@ TP1 de Algoritmos y Estructuras de datos 3
 
 En `src/main.cpp` se encuentra toda la implementación en c++ del TP, siguendo la
 especificación de IO del enunciado (resultado por stdout y tiempo de ejecución
-por stderr). Para compilar basta con hacer `make`, y para correr los tests 
+por stderr). Para compilar basta con hacer `make`, y para correr los tests
 (en `tests/tests.py`), `make test`.
 
 ```bash
@@ -44,3 +44,8 @@ La experimentación se realizó con python, usando las bibliotecas `pandas` y
 
 Para correrlos se recomienda instalar primero los *requirements* (`pip3 install
 -r requirements.txt`) dentro de un virtual env.
+
+## Informe
+
+El pdf se encuentra en [`informe/informe.pdf`](informe/informe.pdf), junto con
+sus sources.

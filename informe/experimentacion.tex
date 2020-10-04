@@ -1,0 +1,311 @@
+\section{Experimentación}
+
+En la experimentación se intentará mostrar las fortalezas y debilidades de cada técnica, comparándolas entre sí para diferentes tipos de instancias. Además, cada instancia tendrá una cantidad de locales $n \in [1,\dots,30]$, lo que permitirá apreciar la evolución del tiempo de ejecución en función de $n$, y compararlo con la complejidad teórica descrita en la Sección \ref{metodologia}. Las ejecuciones fueron realizadas utilizando el lenguaje de programación $C++$, en una computadora con un Intel(R) Core(TM) i5-4460 CPU @ 3.20GHz (32K cache lvl 1, 256K lvl 2 y 6MB lvl 3) y 16GB de RAM.
+
+\subsection{Métodos}
+
+Las técnicas a considerar son las siguientes:
+
+\begin{itemize}
+    \itemsep 0em 
+    \item \textbf{FB}: algoritmo \ref{alg:fuerza_bruta} de Fuerza Bruta, $O(2^n)$
+    \item \textbf{BT}: algoritmo \ref{alg:bactkracking} de Backtracking con ambas podas (optimalidad cacheada y factibilidad. $O(2^n)$
+    \item \textbf{BT-O}: algoritmo de Backtracking solo con podas de optimalidad, con factibilidad en las hojas para todos los locales. $O(n\times2^n)$
+    \item \textbf{BT-O-C}: algoritmo de Backtracking con podas de optimalidad cacheadas, se calculan antes de iniciarlo, pero las podas de factibilidad se hacen en las hojas recorriendo todos los locales. luego su complejidad será $O(n + n\times2^n) \subseteq O(n\times2^n)$
+    \item \textbf{BT-F}: algoritmo de Backtracking solo con podas de factibilidad, por lo tanto su complejidad será $O(2^n)$
+    \item \textbf{DP}: algoritmo \ref{alg:programacion_dinamica} de Programación Dinámica, $O(n\times M)$
+\end{itemize}
+
+%Nuestras hipótesis son que, en general, los algoritmos más sofisticados tenderán a funcionar mejor. Fuerza bruta al ser el más simple debería ser el peor de todos. En cuanto a backtracking, BT-F debería ser mucho mejor que los que no tengan factibilidad, ya que puede llegar a ser mucho lo que se ahorre. En cuanto a optimalidad, BT-O-C debería ser mejor que BT-O ya que evita recalcular lo mismo muchas veces, y el mejor suponemos que será BT ya que combina los mejores aspectos de ambas podas. Pero el mejor de todos debería ser DP, ya que además de podar por factibilidad, dado el solapamiento que viene naturalmente con el problema debería ahorrarse muchas ramas con su memoización.
+
+\subsection{Control}
+
+Para poder comparar las instancias buenas y malas con casos \textit{promedio}, vamos a usar instancias de \textit{control}, generadas tomando aleatoriamente el contagio y beneficio de cada local de rangos fijos. El límite de contagio también se establece aleatoriamente.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[H]{0.45\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/comparativa/todos.svg}
+        \caption{Entre todos los algoritmos para cada $n$, con instancias de control}
+        %\label{fig:y equals x}
+    \end{subfigure}
+    \begin{subfigure}[H]{0.45\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/comparativa/zoom.svg}
+        \caption{Zoom en los algoritmos más rápidos para ver las diferencias}
+        %\label{fig:three sin x}
+    \end{subfigure}
+    \begin{subfigure}[H]{0.45\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/comparativa/bt-dp.svg}
+        \caption{BT vs DP}
+        \label{fig:comp-control-bt-dp}
+    \end{subfigure}
+    \caption{Comparativa para dataset de control}
+    \label{fig:comp-control}
+\end{figure}
+
+Como primera comparación de los algoritmos, en la Figura \ref{fig:comp-control} se puede ver a grandes rasgos la \textit{performance} de cada técnica. Se observa que BT y DP son los que presentan mejores tiempos de ejecución. Lo que puede resultar llamativo es que, viendo la Figura \ref{fig:comp-control-bt-dp}, a pesar de que BT tenga mayor variación, no parecen mostrar grandes diferencias en tiempos de ejecución. Esto puede deberse a que para el caso general, lo que suele definir si una técnica tiene un buen desempeño es si poda por factibilidad o no, lo cual también explicaría los tiempos de BT-F.
+
+\subsection{Podas}
+
+Se estudiarán ambas podas por separado: factibilidad y optimalidad. Se compararán los resultados con FB a modo de control. Es importante notar que no es posible ver un caso \textit{malo} para la poda de factibilidad, ya que se hace en $O(1)$.
+
+\subsubsection{Factibilidad - LowM}
+
+Ya que la poda por factibilidad corta la ejecución de una rama en la que se excedió el límite de contagio, una clase de instancias en las que presente mejor desempeño es aquella en la que el límite de contagio es muy bajo y se alcanza con un par de locales (o incluso uno).
+
+Como se puede ver en la Figura \ref{fig:low-m-comp}, los algoritmos que tienen poda por factibilidad son muchísimo más rápidos que los que no para este tipo de instancias. Además, en la Figura \ref{fig:low-m-control} se ve la comparación con el control, lo que muestra que es un caso más rápido que el promedio.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/podas/factibilidad-low-m-comp.svg}
+        \caption{Comparativa entre podas}
+        \label{fig:low-m-comp}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/podas/factibilidad-low-m-control.svg}
+        \caption{Comparativa con control}
+        \label{fig:low-m-control}
+    \end{subfigure}
+    \caption{Comparativa para dataset de control}
+    \label{fig:low-m}
+\end{figure}
+
+
+
+\subsubsection{Optimalidad}
+
+La poda por optimalidad realiza recortes en instancias que, observando los locales restantes, no pueden llegar a obtener un mejor resultado que el máximo resultado obtenido hasta el momento. Se proponen entonces dos clases de instancias distintas:
+
+\begin{itemize}
+    \item \textbf{Uniformidad}: en caso de que todos los locales presenten el mismo beneficio, no van a existir ciertas ramas que produzcan mejores resultados que otras. En estas circunstancias, nunca se aprovechará la poda por optimalidad, pero siempre se estará pagando el \textit{overhead} de computar el beneficio restante.
+
+    \item \textbf{Uno para dominarlos a todos}: en estas instancias existe un local distinguido, que tiene beneficio mayor a la suma de todos los demás. De esta forma, cada vez que se llegue a él, posteriormente se deberían realizar las podas de todas las ramas.
+
+    Algo a tener en cuenta es que la posición del local distinguido determina la relevancia de la poda. Si se encuentra primero, su beneficio se va a tener en cuenta luego de haber visto todas las hojas, por lo que va a ser lo mismo que el caso uniforme. En cambio, si está del tercero en adelante, se debería almacenar rápidamente su beneficio, haciendo que se poden el resto de los casos. Por lo tanto, correremos solo para $n=30$ variando todas las posiciones posibles.
+\end{itemize}
+
+Se espera que la implementación \textit{cacheada} presente mejores tiempos de ejecución respecto de la que lo computa en el momento.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \includesvg[width=\textwidth]{img/podas/optimalidad-identicos-comp.svg}
+        \caption{Comparativa de tiempos de ejecución de podas para el dataset de idénticos}
+        \label{fig:identicos-comp}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \includesvg[width=\textwidth]{img/podas/optimalidad-one-to-rule-pos.svg}
+        \caption{Tiempo por posición de comercio distinguido en one-to-rule}
+        \label{fig:one-to-rule-comp}
+    \end{subfigure}
+    
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/podas/optimalidad-identicos-control_BT-O.svg}
+        \caption{Comparativa con control para BT-O}
+        %\label{fig:three sin x}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/podas/optimalidad-identicos-control_bt-o-c.svg}
+        \caption{Comparativa con control para BT-O-C}
+    \end{subfigure}
+    \caption{Optimalidad: one-to-rule e indenticos}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \includesvg[width=\textwidth]{img/podas/todos-podas.svg}
+        \caption{Comparativa de tiempos para podas}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \includesvg[width=\textwidth]{img/podas/todos-zoom.svg}
+        \caption{Zoom en los más rápidos}
+    \end{subfigure}
+    \caption{Comparativa de tiempos para todas las podas y todos los datasets.}
+    \label{fig:podas-todos}
+\end{figure}
+
+A pesar de ser un caso favorable, Fig \ref{fig:identicos-comp} muestra que el hecho de no estar aplicando podas por factibilidad hace que aquellos algoritmos que solo aplican podas por optimalidad sean peores que BT y BT-F, pero al menos siguen siendo mejor que FB. Además, en \ref{fig:one-to-rule-comp} vemos como según la posición en la que aparezca el local distinguido, cambia el tiempo de ejecución de la misma manera para BT-O y BT-O-C y, como era de esperar, no cambia para los demás algoritmos que se mantienen relativamente constantes. Finalmente, al comparar con el control se observa lo esperado, tiene un tiempo de ejecución peor al del mejor caso (one to rule), pero mejor que el peor (idénticos).
+
+Por último, se observa en Fig \ref{fig:podas-todos} una comparación de todos los algoritmos. De aquí surgen dos observaciones interesantes. En primer lugar, contrario a lo esperado, la variante con caché de la poda de optimalidad termina siendo más lenta que la que simplemente lo calcula en cada nodo intermedio. Esto puede deberse a que instancias de tamaño ($n$) pequeño como las evaluadas en este trabajo, el costo de ir a buscar el dato cacheado a memoria es mayor a $O(30)$, lo cual tendiendo al infinito no debería suceder. A futuro se podría realizar una ampliación de la experimentación que pusiera a prueba esta hipótesis.
+
+Por otro lado, también puede verse que el mejor de todos fue BT como era esperable y, si bien las podas de optimalidad no le brindaron mucha mejora con respecto a BT-F, se nota cada vez más a medida que aumenta el $n$.
+
+\subsection{Grupos - Solapamiento}
+
+Al margen del solapamiento que se da por la naturaleza del problema, se pueden construir instancias que hagan que sea aún mayor. Intuitivamente, a mayor solapamiento más valores van a estar memoizados, y por lo tanto podremos podar más ramas, así reducir el tiempo de ejecución.
+
+Para modelar estas instancias, se introdujo la noción de \textit{grupos}. Se dividen los locales de cada instancia en alguna cantidad de grupos, para los cuales todos los locales tienen el mismo nivel de contagio. Así, a menor cantidad de grupos, mas locales con el mismo nivel de contagio hay, lo que se espera que lleve a mayor solapamiento, pues permitiría que por una mayor cantidad de caminos se llegue al mismo nivel de contagio restante, ya que se cuenta con el mismo nivel de contagio acumulado.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \includesvg[width=\textwidth]{img/dp/grupos-comp-bt-dp.svg}
+        \caption{Comparativa de tiempos para cantidad de grupos}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \includesvg[width=\textwidth]{img/dp/grupos-zoom.svg}
+        \caption{Zoom en solo DP}
+    \end{subfigure}
+    \caption{Grupos}
+    \label{fig:grupos}
+\end{figure}
+
+Como se puede ver en Fig \ref{fig:grupos}, los grupos no afectan tanto a BT, pero a mayor cantidad de grupos mayor tiempo de ejecución para DP, como era esperado.
+
+% TODO: Si nos da el tiempo hacer esto
+% Para cuantificar el nivel de solapamiento de una instancia, vamos a anotar en una matriz secundaria cada vez que el algoritmo acceda a una posición de la matriz de memoización. Finalmente podremos cuantificar el grado de solapamiento con la densidad de los valores en la matriz.
+
+\subsection{Caché}
+
+Para ver el lado negativo de la memoización, si se cuenta con una estructura lo suficientemente grande como para que no entre toda en caché, para instancias en las que no hay solapamiento debería notarse el \textit{overhead} de ir a memoria.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/dp/cache-por-m.svg}
+        \caption{Tiempo de DP para cache por cada M}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/dp/cache-control.svg}
+        \caption{Comparativa con control}
+    \end{subfigure}
+\end{figure}
+
+Efectivamente, a mayor M, mayor el tamaño de la estructura de memoización y, por lo tanto, mayor el tiempo de ejecución. Comparándolo con el control se aprecia que es peor que el caso promedio.
+
+\subsection{Tiempos vs Complejidad teórica}
+
+Para verificar experimentalmente las complejidades propuestas, se corren los algoritmos contra instancias de diferentes tamaños y se comparan sus tiempos de ejecución con la complejidad teórica. Luego se calcula el grado de correlación mediante el coeficiente de Pearson.
+
+\subsubsection{BT}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/complejidad/bt.svg}
+        \caption{BT - Tiempos vs $O(2^n)$}
+        %\label{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.42\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/complejidad/corr_bt.svg}
+        \caption{BT - Pearson: 0.828}
+        %\label{fig:three sin x}
+    \end{subfigure}
+
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/complejidad/bt-o.svg}
+        \caption{BT-O - Tiempos vs $O(n \times 2^n)$}
+        %\label{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.42\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/complejidad/corr_bt-o.svg}
+        \caption{BT-O - Pearson: 0.947}
+        %\label{fig:three sin x}
+    \end{subfigure}
+    
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/complejidad/bt-o-c.svg}
+        \caption{BT-O-C - Tiempos vs $O(n \times 2^n)$}
+        %\label{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.42\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/complejidad/corr_bt-o-c.svg}
+        \caption{BT-O-C - Pearson: 0.955}
+        %\label{fig:three sin x}
+    \end{subfigure}
+
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/complejidad/bt-f.svg}
+        \caption{BT-F - Tiempos vs $O(2^n)$}
+        %\label{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.42\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/complejidad/corr_bt-f.svg}
+        \caption{BT-F - Pearson: 0.967}
+        %\label{fig:three sin x}
+    \end{subfigure}
+\end{figure}
+
+Los tiempos de ejecución de las variantes de BT se asemejan a la curva de la complejidad teórica propuesta.
+
+\subsubsection{FB}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/complejidad/fb.svg}
+        \caption{FB - Tiempos vs $O(2^n)$}
+        %\label{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.42\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/complejidad/corr_fb.svg}
+        \caption{FB - Pearson: 0.999}
+        %\label{fig:three sin x}
+    \end{subfigure}
+\end{figure}
+
+Como se puede ver, al ser el algoritmo que menos varía según el caso, ya que siempre recorre \textit{todo} el espacio de búsqueda, su tiempo de ejecución se asemeja mucho en todos los casos a la complejidad teórica en peor caso.
+
+\subsubsection{DP}
+
+En este caso no es tan simple como para los demás, ya que la complejidad depende de dos parámetros en lugar de sólo uno. Por eso se graficó cada una por separado en función de la otra. En todos los casos se debería tener una relación lineal.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/complejidad/dp-tiempo-mn.svg}
+        \caption{Tiempo en función de $m$ para cada $n$}
+        \label{fig:comp-dp-nm}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/complejidad/dp-tiempo-nm.svg}
+        \caption{Tiempo en función de $n$ para cada $m$}
+        \label{fig:comp-dp-mn}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.42\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/complejidad/corr_dp.svg}
+        \caption{Comparación con $O(n\times M)$, Pearson: 0.978}
+        %\label{fig:three sin x}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{img/complejidad/dp-heatmap.svg}
+        \caption{Tiempos para cada $n$ y $m$}
+        %\label{fig:three sin x}
+    \end{subfigure}
+    \caption{Tiempos para DP}
+\end{figure}
+
+Efectivamente, como se puede ver en \ref{fig:comp-dp-nm} y \ref{fig:comp-dp-mn} hay una relación lineal entre n y m, la cual esta fuertemente correlacionada ($0.978$) con la complejidad teórica. Otra forma de visualizarlo es con el \textit{heatmap}.
