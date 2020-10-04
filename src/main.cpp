@@ -217,7 +217,7 @@ int npm_bt_poda_opt(int i, int M, vector<bool> &vecinos, vector<Local> &ls, int 
 }
 
 // NPM con backtracking con podas de optimalidad Y factibilidad
-// Complejidad temporal: O(n * 2^n)
+// Complejidad temporal: O(2^n)
 int npm_bt(int i, int M, vector<bool> &vecinos, vector<Local> &ls, int B, int &maxB, vector<int>& cacheB) {
     /* Podas de factibilidad */
     // Si nos pasamos del limite de contagio no es una instancia valida
