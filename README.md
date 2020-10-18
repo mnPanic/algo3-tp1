@@ -49,3 +49,9 @@ Para correrlos se recomienda instalar primero los *requirements* (`pip3 install
 
 El pdf se encuentra en [`informe/informe.pdf`](informe/informe.pdf), junto con
 sus sources.
+
+## Changelog
+
+Cambios con respecto a la entrega
+
+- TODO: Implementación: PD bien
