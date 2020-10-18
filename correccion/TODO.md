@@ -9,26 +9,26 @@ Comentarios de juli
 
 ## Introduccion
 
-- [] Aclarar definicion formal de problema
-- [] Aclarar ejemplo
+- [X] Aclarar definicion formal de problema
+- [X] Aclarar ejemplo
 
 ## Meotodlogia
 
 ### Fuerza Bruta
 
-- [] Corregir justificacion de complejidad
-- [] Hacer que el pseudocodigo sea mas codigo y menos coloquial
-- [] Ejemplo: Agregar armado de casos, corregir solución optima
+- [X] Corregir justificacion de complejidad
+- [X] Hacer que el pseudocodigo sea mas codigo y menos coloquial
+- [X] Ejemplo: Agregar armado de casos, corregir solución optima
 
 ### BT
 
-- [] Corregir pseudocodigo
-- [] Corregir "la solucion optima": puede haber mas de una
+- [X] Corregir pseudocodigo
+- [X] Corregir "la solucion optima": puede haber mas de una
 
 ### PD
 
-- [] Agregar chequeo de vecindad a la formulación recursiva y a la parte de correctitud.
-- [] Corregir el pseudocodigo
+- [X] Agregar chequeo de vecindad a la formulación recursiva y a la parte de correctitud.
+- [X] Corregir el pseudocodigo
 
 ## Experimentación
 
@@ -88,6 +88,6 @@ De esa forma correrian mas rapido los exp y sacariamos los n que no nos sirven d
 
 ## Conclusion
 
-[] Explicar cuando las matrices resultan ralas, y aclarar que una matriz rala es
+[X] Explicar cuando las matrices resultan ralas, y aclarar que una matriz rala es
 aquella con muchos 0s.
-[] Agregar que se evaluaron distintos tipos de instancias, aleatorias, one-to-rule, grupos, etc.
+[X] Agregar que se evaluaron distintos tipos de instancias, aleatorias, one-to-rule, grupos, etc.

@@ -54,4 +54,7 @@ sus sources.
 
 Cambios con respecto a la entrega
 
-- TODO: Implementación: PD bien
+- pd: Se simplifica la implementación.
+- Informe:
+  - Se corrigen todos los pseudocodigos.
+  - Se corrige la seccion de PD para que refleje la nueva implementación.
