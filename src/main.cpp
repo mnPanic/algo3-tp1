@@ -19,15 +19,7 @@ struct Local {
     int contagio;
 };
 
-struct Resultado {
-    int set;
-    int unset;
-};
-
-Resultado MEM_UNDEFINED = Resultado{-1, -1};
-bool mem_undefined(Resultado r) {
-    return r.set == MEM_UNDEFINED.set && r.unset == MEM_UNDEFINED.unset;
-}
+constexpr int MEM_UNDEFINED = -1;
 
 /** Funciones auxiliares **/
 
@@ -249,36 +241,25 @@ int npm_bt(int i, int M, vector<bool> &vecinos, vector<Local> &ls, int B, int &m
 
 // NPM por programacion dinamica
 // Complejidad temporal: O(n * M)
-int npm_pd(int i, int M, bool vecino, vector<Local> &ls, vector<vector<Resultado>> &mem) {
+int npm_pd(int i, int M, vector<Local> &ls, vector<vector<int>> &mem) {
     // Si nos pasamos del limite de contagio no es una instancia valida
     if (M < 0) return -INF;
 
     // Caso base
-    if (i == 0) return 0;
+    // Menor a 0 ya que a veces decrementamos de a 2.
+    if (i < 0) return 0;
 
     // Llamado recursivo
-    if (mem_undefined(mem[i][M])) {
-        // Memoizamos siempre el valor "feliz", sin importarnos del contexto de
-        // donde venimos, para que asi este caso sea independiente de los
-        // anteriores.
-        mem[i][M] = Resultado{
-            .set   = npm_pd(i-1, M - ls[i].contagio, true /* vecino */, ls, mem) + ls[i].beneficio,
-            .unset = npm_pd(i-1, M, false /* vecino */, ls, mem)
-        };
+    if (mem[i][M] == MEM_UNDEFINED) {
+        mem[i][M] = max(
+            // Para ponernos a nosotros, directamente salteamos el siguiente ya
+            // que sabemos que no va a ser una solución factible.
+            npm_pd(i - 2, M - ls[i].contagio, ls, mem) + ls[i].beneficio,
+            npm_pd(i - 1, M, ls, mem)
+        );
     }
 
-    Resultado res = mem[i][M];
-
-    // Pero antes de retornar lo memoizado, debemos verificar que la
-    // solución devuelta cumpla con la restricción de locales vecinos.
-    // Esto solo puede suceder si la "ganadora" del llamado recursivo fue en
-    // la que nos pusimos, y en caso de que nuestro vecino tambien este,
-    // volvemos atras y retornamos el valor de la rama opuesta.
-    if (res.set > res.unset && vecino) {
-        return res.unset;
-    }
-
-    return max(res.set, res.unset);
+    return mem[i][M];
 }
 
 void grado_solapamiento(int i, int M, vector<Local> &ls, vector<vector<int>> &llamados) {
@@ -363,9 +344,9 @@ int main(int argc, char** argv) {
 
         maximum = npm_bt_poda_opt_cache(n, M, vecinos, locales, 0, maximoBeneficio, cacheB);
     } else if (algorithm == "DP") {
-        auto mem = vector<vector<Resultado>>(n+1, vector<Resultado>(M+1, MEM_UNDEFINED));
+        auto mem = vector<vector<int>>(n+1, vector<int>(M+1, MEM_UNDEFINED));
         bool initial_vecino = true;
-        maximum = npm_pd(n, M, false, locales, mem);
+        maximum = npm_pd(n, M, locales, mem);
     } else if (algorithm == "GR") {
         vector<vector<int>> accesses(n+1, vector<int>(M+1, 0));
         grado_solapamiento(n, M, locales, accesses);
