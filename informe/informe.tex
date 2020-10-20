@@ -16,19 +16,13 @@
 \usepackage{epsfig}
 \usepackage{pgfplots}
 \usepackage{graphicx}
-\usepackage{epsfig}
 \usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox[cmyk]{0.43, 0.35, 0.35,0.01}{\parbox{\textwidth}{\hspace{15pt}#1#2#3}}}
+
 \usepackage{subcaption}
 \usepackage{svg}
 \setsvg{inkscapeexe=inkscape inscapeopt=-z -D}
-
-% Comandos para teoremas etc.
-\usepackage{amsthm}
-\newtheorem{theorem}{Teorema}
-\newtheorem{lemma}[theorem]{Lema}
-\newtheorem{proposition}[theorem]{Proposición}
-\newtheorem{remark}{Observación}
-\newtheorem{corollary}{Corolario}
 
 % Comandos para algoritmos.
 \usepackage[noend]{algpseudocode}
@@ -67,10 +61,6 @@
 \setlength{\headheight}{13.1pt}
 
 \renewcommand{\baselinestretch}{1.1}  % line spacing
-
-\usepackage{caption}
-\DeclareCaptionFont{white}{\color{white}}
-\DeclareCaptionFormat{listing}{\colorbox[cmyk]{0.43, 0.35, 0.35,0.01}{\parbox{\textwidth}{\hspace{15pt}#1#2#3}}}
 
 % ******************************************************** %
 

@@ -6,37 +6,41 @@ La técnica de \textbf{fuerza bruta} consiste en recorrer \textbf{todo} el espac
 
 La idea del algoritmo \ref{alg:fuerza_bruta} es generar de forma recursiva las soluciones recorriendo todos los locales, pudiendo elegir incluir o no cada local en cada paso. Al contar con todo el espacio de soluciones, se recorre cada una para determinar si es factible y, en caso de serlo, se devuelve su beneficio total. Luego se selecciona alguna de las óptimas dentro del conjunto de soluciones factibles.
 
-En la fig. \ref{fig:ejemplo_fuerza_bruta} se puede observar un ejemplo del árbol de recursión generado para la instancia detallada más arriba. Cada nodo intermedio representa una solución parcial, es decir, la solución al problema considerando hasta el local \textit{i}-ésimo. Las hojas representan todas las soluciones posibles. La solución óptima se colorea con verde, las demás soluciones factibles, con azul y las soluciones no factibles, con rojo. La solución al problema analizado se obtiene llamando a $FB(L, n, M, vecindad, 0)$ donde $vecindad$ es un vector de \textit{boolean} inicializado en cada posición en \textit{False}.
+En la Fig. \ref{fig:ejemplo_fuerza_bruta} se puede observar un ejemplo del árbol de recursión generado para la instancia detallada más arriba. Cada nodo intermedio representa una solución parcial, es decir, la solución al problema considerando hasta el local \textit{i}-ésimo. Las hojas representan todas las soluciones posibles. La solución óptima se colorea con verde, las demás soluciones factibles, con azul y las soluciones no factibles, con rojo. La solución al problema analizado se obtiene llamando a $FB(L, n, M, vecindad, 0)$ donde $vecindad$ es un vector de \textit{boolean} inicializado en cada posición en \textit{False}.
 
 La correctitud del algoritmo proviene del hecho de que se recorre \textit{todo} el espacio de soluciones, dado que para cada local de $L$ se generan dos ramas, si se considera para la subsecuencia o no. Y al llegar a las hojas se filtran las soluciones que no sean óptimas o factibles.
 
-La complejidad en el peor caso es $O(n\times2^n)$, lo que se desprende de que el árbol utilizado para recorrer el espacio de soluciones es un árbol binario completo de altura $n+1$. Además, en el caso base se recorre todo el vector de vencindad para generar el beneficio acumulado, lo que se realiza en $O(n)$. En el resto de los casos, solamente se realiza el llamado recursivo y se utiliza la función $max$ lo que se considera de complejidad constante $O(1)$. Se puede observar que frente a cualquier instancia el algoritmo se comportará de igual manera, dado que genera el mismo tipo de árbol con la misma cantidad de nodos, es por ello que el conjunto de instancias del peor caso es igual al del mejor caso.
+El algoritmo genera y recorre de forma completa en todos los casos un árbol de backtracking de $O(2^n)$ nodos. En cada uno se realizan operaciones de tiempo constante excepto en las hojas, en las cuales se realizan los chequeos de factibilidad que son $O(n)$, ya que iteran todo el vector de vecinos. Por lo tanto, la complejidad temporal del algoritmo es $O(2^n \times n)$. Se puede observar que frente a cualquier instancia el algoritmo se comportará de igual manera, dado que genera el mismo tipo de árbol con la misma cantidad de nodos, es por ello que el conjunto de instancias del peor caso es igual al del mejor caso.
 
 % Algoritmo descriptivo de FB
 \begin{algorithm}
     \begin{algorithmic}[1]
-        \Function{$FB$}{$locales$, $n$, $M$, $vecindad$, $i$}
-            \If{Ya recorrí todos los locales}
-                \For {j in [0..n]}
-                    \State{Voy acumulando el beneficio y el contagio}
-                    \State{Verifico el vector de la vecindad}
-                
-                    \If{Hay dos vecinos consecutivos}
+        \Function{FB}{$locales$, $n$, $M$, $vecindad$, $i$}
+            \If{i = n + 1}
+                \State $beneficio \gets 0$
+                \State $contagio \gets 0$
+                \For {j in [1..n]}
+                    \If{$j \neq n \wedge vecindad[j] = True \wedge vecindad[j+1] = True$} \Comment{Hay dos vecinos consecutivos}
                         \State{\textbf{return} instancia inválida}
                     \EndIf
                     
-                    \If{Si el local actual pertenece}
-                        \State{Acumulo su beneficio y contagio}
+                    \If{$petenencia[j] = True$} \Comment{El local actual pertence}
+                        \State $beneficio \gets beneficio + b_j$
+                        \State $contagio \gets contagio + c_j$
                     \EndIf
                     
-                    \If{Pasé el contagio permitido}
+                    \If{$contagio > M$}
                         \State{\textbf{return}  instancia inválida}
                     \EndIf
                     
                 \EndFor
-                \State{\textbf{return} el beneficio acumulado}
+                \State{\textbf{return} $beneficio$}
             \Else 
-                \State \textbf{return} el máximo entre FB poniendo al local \textit{i} y no poniéndolo.
+                \State \textcolor{gray}{\textit{Usamos $(var \gets value)$ como algo que devuelve $var$ modificado por simplicidad.}}
+                \State $\begin{aligned}[t]
+                    \text{\textbf{return }} max(&FB(locales,\ n,\ M,\ (vecindad[i] \gets False),\ i+1),\\
+                    &FB(locales,\ n,\ M - c_i,\ (vecindad[i] \gets True),\ i+1)&
+                \end{aligned}$
             \EndIf
         \EndFunction
     \end{algorithmic}
@@ -44,13 +48,11 @@ La complejidad en el peor caso es $O(n\times2^n)$, lo que se desprende de que el
     \label{alg:fuerza_bruta}
 \end{algorithm}
 
-
-
 % Gráfico con árbol de recursión de FB
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
-    \includesvg[scale=0.2]{img/fb-tree-svg}
-    \caption{Ejemplo de ejecución del Algoritmo~\ref{alg:fuerza_bruta} para $L=[1,2,3]$ con $b=[20,15,30]$, $c=[10, 15, 20]$ y $M=30$. En rojo las soluciones no factibles, en azul las factibles y en verde la solución óptima $\{3\}$.}
+    \includegraphics[scale=0.15]{img/Tree-Locales.png}
+    \caption{Ejemplo de ejecución del Algoritmo~\ref{alg:fuerza_bruta} para $L=[1,2,3]$ con $b=[20,15,30]$, $c=[10, 15, 20]$ y $M=30$. En rojo las soluciones no factibles, en azul las factibles y en verde la solución óptima $\{1, 3\}$. En cada paso se agrega o no cada local al subconjunto, el cual se marca en las aristas.}
     \label{fig:ejemplo_fuerza_bruta}
 \end{figure}
 
@@ -60,37 +62,40 @@ El algoritmo de \textit{backtracking} recorre un árbol para generar las solucio
 
 \begin{itemize}
     \item \textbf{Factibilidad.} Dada una solución parcial $S'$ representada por un nodo intermedio $n_0$ que cuenta con un contagio acumulado $m=\sum S'_c$ y el vector de vecindad en estado $V'$. Como para todo local $L_i$ tenemos valores de contagio positivos, si $m>M$ entonces no tiene sentido continuar extendiendo $S'$ porque en todos los casos el contagio final excederá $M$. Además, si en $V_i$ tenemos las últimas dos posiciones del vector indicando que están presentes $L_{i+1}$ y $L_{i+2}$, cualquiera de las soluciones finales tendrá dos vecinos colindantes y no será factible. En cualquiera de los dos casos, se puede evitar continuar recorriendo el subárbol formado a partir del eje $n_0$ y así reducir el número de operaciones. Se puede observar el pseudocódigo en el algoritmo \ref{alg:bactkracking}
-    \item \textbf{Optimalidad.} Dada una solución parcial $S'$ representada por un nodo intermedio $n_i$ con beneficio $b=\sum S'_b$. Se cuenta con la solución factible con beneficio máximo $B$ hasta el momento. En cada nodo se calcula $b_r$, beneficio que se puede obtener al agregar a todos los locales por recorrer. Finalmente, si $b + b_r\le B$ cualquier decisión que se tome a continuación en el subárbol llevará a una solución al menos tan buena como la ya conocida. Por lo tanto, se puede podar esa rama y evitar cálculos innecesarios. En el algoritmos \ref{alg:bactkracking} se actualiza la variable de $maxBeneficio$ cada vez que se encuentra una solución factible en la línea 11 y se evalúa la regla de la poda en la línea 8.
+    \item \textbf{Optimalidad.} Dada una solución parcial $S'$ representada por un nodo intermedio $n_i$ con beneficio $b=\sum S'_b$. Se cuenta con la solución factible con beneficio máximo $B$ hasta el momento. En cada nodo se calcula $b_r$, beneficio que se puede obtener al agregar a todos los locales por recorrer. Finalmente, si $b + b_r\le B$ cualquier decisión que se tome a continuación en el subárbol llevará a una solución al menos tan buena como la ya conocida. Por lo tanto, se puede podar esa rama y evitar cálculos innecesarios. En el algoritmos \ref{alg:bactkracking} se actualiza la variable de $maxB$ cada vez que se encuentra una solución factible y se evalúa la regla de la poda. Además, se agrega una pequeña variación que precalcula los valores de $b_r$ para cada nodo y los almacena en una caché. La única diferencia entre ambos es cómo se implementa $maximoBeneficioRestante$ de la línea \ref{alg:bt-max-restante}. 
 \end{itemize}
 
 % Algoritmo descriptivo de BT
 \begin{algorithm}
     \begin{algorithmic}[1]
-        \Function{$BT$}{$locales$, $i$, $M$, $vecindad$, $beneficioacumulado$, $maxBeneficio$}
-            \If{Se excedió el contagio máximo}
+        \Function{$BT$}{$locales$, $i$, $M$, $vecindad$, $B$, $maxB$}
+            \If{$M < 0$}
                 \State{\textbf{return} instancia inválida}
             \EndIf
-            \If{Los dos vecinos anteriores están en la solución parcial}
+            \If{$i < (|locales| - 1 \wedge vecinos[i + 1] = True \wedge vecinos[i + 2] = True$}
                 \State{\textbf{return} instancia inválida}
             \EndIf
-            \If{Ya recorrí todos los locales}
-                \State{\textbf{return} beneficioacumulado}
+            \If{$i = 0$}
+                \State{\textbf{return} $B$}
             \EndIf
-            \If{Si $beneficioacumulado$ + lo máximo que puedo agregar < maxBeneficio}
+            \If{$B + maximoBeneficioRestante(locales, i) < maxBeneficio$}\label{alg:bt-max-restante}
                 \State{\textbf{return} instancia inválida}
             \EndIf
-            \State{Calculo el maxLocal entre poner o no el siguiente local, actualizando el M y el beneficioAcumulado}
-            \State{Actualizo maxBeneficio si corresponde}
-            \State{\textbf{return} maxLocal}
+            \State $maxLocal \gets \begin{aligned}[t] % t de top
+                 max(&BT(locales,\ i-1,\ M,\ (vecindad[i] \gets False),\ B,\ maxB),\\
+                     &BT(locales,\ i-1,\ M,\ (vecindad[i] \gets True),\ B + b_i,\ maxB)&
+            \end{aligned}$
+            \State $maxB \gets max(maxLocal, maxB)$
+            \State \textbf{return} $maxLocal$
         \EndFunction
     \end{algorithmic}
     \caption{Algoritmo de $Backtracking$ para NPM.}
     \label{alg:bactkracking}
 \end{algorithm}
 
-La solución al problema se obtiene llamando $BT(locales, n, M, vecindad, 0, 0)$. Como en el peor caso no se aplica ninguna poda, se recorren todos los nodos del árbol de soluciones, que ya vimos que son $O(2^n)$. En cada uno se hacen las podas de factibilidad que son de orden constante, y la de optimalidad que es $O(n)$ (ya que se recorren en el peor caso todos los locales). El resto de las operaciones se hacen en orden constante. Por lo tanto, la complejidad temporal es $O(n \times 2^n)$.
+La solución al problema se obtiene llamando $BT(locales, n, M, vecindad, 0, 0)$. Como en el peor caso no se aplica ninguna poda, se recorren todos los nodos del árbol de soluciones, que ya vimos que son $O(2^n)$. En cada uno se hacen las podas de factibilidad que son de orden constante, y la de optimalidad que es $O(n)$ (ya que se recorren en el peor caso todos los locales) o $O(1)$ si esta cacheada. El resto de las operaciones se hacen en orden constante. Por lo tanto, la complejidad temporal es $O(n \times 2^n)$ y $O(2^n)$ si se usa la variante cacheada.
 
-Existen instancias donde el algoritmo va a recorrer el árbol de soluciones completos, por ejemplo todas las que presenten contagios $c=[k,k,\dots,k]$, beneficios $b=[l,l,\dots,l]$ y $M>k*n$ con $k,l \in \mathbb{N}_{\ge 0}$. En este caso la solución óptima es agregar todos los locales de posición impar, pues todos presentan iguales contagio y beneficio y además, el valor de $M$ permite agregar virtualmente todos los locales.
+Existen instancias donde el algoritmo va a recorrer el árbol de soluciones completos, por ejemplo todas las que presenten contagios $c=[k,k,\dots,k]$, beneficios $b=[l,l,\dots,l]$ y $M>k*n$ con $k,l \in \mathbb{N}_{\ge 0}$. En este caso una solución óptima es agregar todos los locales de posición impar, pues todos presentan iguales contagio y beneficio y además, el valor de $M$ permite agregar virtualmente todos los locales.
 
 Por otro lado, el mejor caso ocurre cuando la solución óptima se encuentra rápido o cuando se corta rápidamente porque se excede la cota de contagios. Las instancias de tipo $b=[1,\dots,1,B]$ con $B>n$ y/o con $c=[C,\dots,C,C']$ con $C>M$ y $C'<M$. Así se encuentra una solución óptima en la primera rama y luego se realizan las correspondientes podas por optimalidad y/o factibilidad lo que garantiza que ningún otro nodo se ramifique. En estos casos el algoritmo se comportará de forma cuadrática.
 
@@ -100,13 +105,11 @@ Los algoritmos de \textit{programación dinámica} entran en acción cuando exis
 
 \begin{equation}
     npm\_pd(i, M) = 
-    \left\{     
-        \begin{array}{lcc}
-            -\infty & si & M < 0                \\
-            0       & si & i = 0                \\
-            max \{npm\_pd(i-1, M - c_i) + b_i, npm\_pd(i-1,M) \}   & sino & \\
-        \end{array}
-    \right.
+        \begin{cases}
+            -\infty & \text{si } M < 0 \\
+            0 & \text{si } i = 0 \\
+            max \{npm\_pd(i-2, M - c_i) + b_i,\ npm\_pd(i-1,M) \} & \text{sino}
+        \end{cases}
     \label{eq:npm_pd}
 \end{equation}
 
@@ -119,35 +122,34 @@ Coloquialmente se puede definir a $npm\_pd(i, M)$ como el máximo beneficio de u
 
     \item Si $i=0$ entonces quiere decir que buscamos la subsecuencia de beneficio máximo dentro de una secuencia de locales vacía. En este caso, como el beneficio de la lista vacía es nulo se tiene que $npm\_pd(n,M) = 0$.
     
-    \item En el resto de los casos, se desea buscar una subsecuencia de $L^i=[L_1,\dots,L_i]$ que tenga beneficio máximo con límite de contagio $M$. De existir una subsecuencia que cumpla las condiciones, puede tener o no al $i$-ésimo local. Basta entonces con contemplar al local $i$-ésimo, y luego seguir buscando soluciones de forma recursiva. Si no lo consideramos, seguimos la búsqueda a partir del local siguiente: $npm\_pd(i-1,m)$. Si consideramos al $i$-ésimo elemento, el resto de la solución tendrá límite de contagio $M - c_i$, y el beneficio total tendrá también $b_i$, lo que es lo mismo que obtener $npm\_pd(i-1, m-c_i) + b_i$. Por último, la mejor solución será el máximo entre ambas.
+    \item En el resto de los casos, se desea buscar una subsecuencia de $L^i=[L_1,\dots,L_i]$ que tenga beneficio máximo con límite de contagio $M$. De existir una subsecuencia que cumpla las condiciones, puede tener o no al $i$-ésimo local. Basta entonces con contemplar al local $i$-ésimo, y luego seguir buscando soluciones de forma recursiva. Si no lo consideramos, seguimos la búsqueda a partir del local siguiente: $npm\_pd(i-1,m)$. Si consideramos al $i$-ésimo elemento, el resto de la solución tendrá límite de contagio $M - c_i$, y el beneficio total tendrá también $b_i$, pero además salteamos al siguiente local, ya que si el $i$-ésimo abre, el $i + 1$ nunca podría estar abierto en una solución factible. Lo que es lo mismo que obtener $npm\_pd(i-2, m-c_i) + b_i$. Por último, la mejor solución será el máximo entre ambas.
 \end{enumerate}
 
 \textbf{Memoización}
 
-Se puede ver que la función recursiva \ref{eq:npm_pd} toma dos parámetros: $i \in [1,\dots,n]$ y $m \in [0,\dots,M]$. Los casos con $i=0$ y $m<0$ son casos base y se resuelven de manera \textit{ad-hoc} en tiempo constante. Por lo tanto, la cantidad de posibles combinaciones con la que se puede llamar a la función está determinada por la combinación de ambos. Es así que resulta haber $O(n*M)$ casos posibles, de manera que si se puede implementar una memoria que recuerde y almacene el resultado de los casos ya resueltos se puede calcular una sola vez cada uno y asegurar, de esa manera, resolver el problema sin resolver más de $O(n*M)$ subproblemas. El algoritmo \ref{alg:programacion_dinamica} muestra la idea aplicada a la función \ref{eq:npm_pd}.
+Se puede ver que la función recursiva \ref{eq:npm_pd} toma dos parámetros: $i \in [1,\dots,n]$ y $m \in [0,\dots,M]$. Los casos con $i=0$ y $m<0$ son casos base y se resuelven de manera \textit{ad-hoc} en tiempo constante. Por lo tanto, la cantidad de posibles combinaciones con la que se puede llamar a la función está determinada por la combinación de ambos. Es así que resulta haber $O(n\times M)$ casos posibles, de manera que si se puede implementar una memoria que recuerde y almacene el resultado de los casos ya resueltos se puede calcular una sola vez cada uno y asegurar, de esa manera, resolver el problema sin resolver más de $O(n\times M)$ subproblemas. El algoritmo \ref{alg:programacion_dinamica} muestra la idea aplicada a la función \ref{eq:npm_pd}.
 
 % Algoritmo descriptivo de PD
 \begin{algorithm}
     \begin{algorithmic}[1]
-        \Function{$PD$}{$locales$, $i$, $M$, $vecino$, $memoria$}
-            \If{Se excedió el contagio máximo}
-                \State{\textbf{return} instancia inválida}
+        \Function{$PD$}{$i$, $M$, $locales$, $mem$}
+            \If{$M < 0$}
+                \State{\textbf{return} $-\infty$}
             \EndIf
             \If{$i = 0$}
                 \State{\textbf{return} $0$}
             \EndIf
-            \If{Aún no calculé el subproblema}
-                \State{Calculo los beneficios obtenidos al poner o no al siguiente local}
-                \State{Guardo ambos valores en memoria en forma de tupla}
+            \If{$mem[i][M]$ no está definido}
+                \State $mem[i][M] \gets \begin{aligned}[t]
+                    max\{&PD(i - 1,\ M,\ locales,\ mem),\\
+                    &PD(i-2,\ M - c_i,\ locales,\ mem) + b_i \}
+                \end{aligned}$
             \EndIf
-            \If{La solución obtenida por poner al local no cumple con la restricción de vecindad}
-                \State{\textbf{return} el resultado de la otra rama}
-            \EndIf
-            \State{\textbf{return} el máximo valor guardado en memoria}
+            \State{\textbf{return} $mem[i][M]$}
         \EndFunction
     \end{algorithmic}
-    \caption{Algoritmo de $Programacion$ $dinamica$ para NPM.}
+    \caption{Algoritmo de \textit{Programacion dinamica} para NPM.}
     \label{alg:programacion_dinamica}
 \end{algorithm}
 
-La complejidad del algoritmo queda determinada por la cantidad de posibles estados o subproblemas que se resuelven y el costo de resolver cada uno. Como se mencionó anteriormente, se resuelven a lo sumo $O(n*M)$ subproblemas. Las operaciones de las líneas 2 a 6 y 8 a 11 se realizan en tiempo constante $O(1)$ y en la línea 7 se realiza el llamado recursivo. Así es como se deduce que el algoritmo tiene complejidad $O(n*M)$ en el peor caso. La memoria se puede implementar como una matriz de acceso y escritura constante y su inicialización tiene un costo $O(n*M)$, es por eso que tanto el peor como mejor caso tendrán complejdiad $O(n*M)$.
+La complejidad del algoritmo queda determinada por la cantidad de posibles estados o subproblemas que se resuelven y el costo de resolver cada uno. Como se mencionó anteriormente, se resuelven a lo sumo $O(n\times M)$ subproblemas, y cada uno en tiempo constante. Así es como se deduce que el algoritmo tiene complejidad $O(n\times M)$ en el peor caso. La memoria se puede implementar como una matriz de acceso y escritura constante y su inicialización tiene un costo $O(n\times M)$, es por eso que tanto el peor como mejor caso tendrán complejidad $O(n\times M)$.
