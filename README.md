@@ -52,9 +52,19 @@ sus sources.
 
 ## Changelog
 
-Cambios con respecto a la entrega
+Cambios con respecto a la primer entrega.
 
 - pd: Se simplifica la implementación.
 - Informe:
-  - Se corrigen todos los pseudocodigos.
-  - Se corrige la seccion de PD para que refleje la nueva implementación.
+  - Introducción: Se aclaran ejemplos y definición formal.
+  - Metodología:
+    - Se corrigen todos los pseudocodigos.
+    - Se corrige la seccion de PD para que refleje la nueva implementación.
+  - Experimentación
+    - Se corrigen complejidades
+    - Se explica con más detalle cómo se arman las instancias de control, low m y grupos.
+    - Se aclara la justificación de por qué `BT-O` performa mejor que `BT-O-C`.
+    - Se agrega conclusiones extra sobre comparativas con complejidada teórica.
+  - Conclusión
+    - Se aclara cuando las matrices resultan ralas
+    - Se agrega que tipos de instancias son consideradas.
